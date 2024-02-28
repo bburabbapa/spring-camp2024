@@ -1,0 +1,70 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--membermapper.java연결  -->
+<mapper namespace="com.java.www.mapper.NBoardMapper2">
+    <!-- 게시글 전체 가져오기 -->
+    <select id="NSelectAll" resultType="com.java.www.dto.NBoardDto2">
+     select * from n_board where n_bno between 1 and 5
+    </select> 
+    
+       <!-- 게시글 전체 가져오기  -->
+    <select id="NlistSelectAll" resultType="com.java.www.dto.NBoardDto2">
+		SELECT * FROM (SELECT rownum rnum, a.* 
+        FROM (SELECT * FROM n_board
+            <if test="searchTitle=='n_btitle' or searchTitle=='n_bcontent' or searchTitle=='id'">
+                WHERE ${searchTitle} LIKE '%'||#{searchWord}||'%'
+            </if>
+            <if test="searchTitle=='all'">
+         WHERE n_btitle LIKE '%'||#{searchWord}||'%' OR n_bcontent LIKE '%'||#{searchWord}||'%'
+            </if>
+		) a ) WHERE rnum BETWEEN #{startRow} AND #{endRow}
+    </select> 
+    
+    
+    <!-- 게시글 총개수  -->
+   <select id="NlistSelectCountAll" resultType="int">
+     	select count(*) from n_board
+        <if test="searchTitle =='n_btitle' or searchTitle =='n_bcontent' or searchTitle=='id'">
+          where ${searchTitle} like '%'||#{searchWord}||'%'
+        </if>
+        <if test="searchTitle=='all'">
+          where n_btitle like '%'||#{searchWord}||'%' or n_bcontent like '%'||#{searchWord}||'%'
+        </if>
+   </select>
+   
+
+    
+     <!-- 게시글1개 가져오기 : 현재글 -->
+    <select id="NlistSelectOne" resultType="com.java.www.dto.NBoardDto2">
+     	select * from n_board where n_bno = #{n_bno}
+    </select> 
+    
+    <!-- 게시글1개 가져오기 : 이전글 -->
+     <select id="preSelectOne" resultType="com.java.www.dto.NBoardDto2">
+        select * from (select rownum rnum, a.* from 
+		(select * from n_board order by n_bno desc) a )
+		where rnum =(select rnum from (select rownum rnum, a.* from 
+		(select * from n_board order by n_bno desc) a)
+		where n_bno=#{n_bno})+1		
+    </select> 
+    
+    <!-- 게시글1개 가져오기 : 다음글 -->
+    <select id="nextSelectOne" resultType="com.java.www.dto.NBoardDto2">
+      select * from (select rownum rnum, a.* from 
+		(select * from n_board order by n_bno desc) a )
+		where rnum =(select rnum from (select rownum rnum, a.* from 
+		(select * from n_board order by n_bno desc) a)
+		where n_bno=#{n_bno})-1		
+    </select> 
+    
+    <!-- 조회수 1증가 -->
+<!--   <update id="f_bhitUp">
+	      update f_board set f_bhit= f_bhit+1 where f_bno=#{f_bno}
+	   </update> --> 
+	    
+    
+    
+</mapper>
+

@@ -1,0 +1,42 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <!--인터페이스 연결 MemberMapper.java -->  
+<mapper namespace="com.java.www.mapper.TSearchMapper"> 
+	<insert id="insertTheme">
+		insert into themeList values (#{contentId},#{facltNm},#{lineIntro},
+		#{intro},#{facltDivNm},#{mangeDivNm},#{featureNm},#{induty},#{lctCl},#{doNm},#{sigunguNm},#{zipcode},#{addr1}
+		,#{addr2},#{mapX},#{mapY},#{direction},#{tel},#{homepage},#{resveUrl},#{resveCl},#{gnrlSiteCo},#{autoSiteCo},#{glampSiteCo}
+		,#{caravSiteCo},#{indvdlCaravSiteCo},#{siteBottomCl1},#{siteBottomCl2},#{siteBottomCl3},#{siteBottomCl4},#{siteBottomCl5}
+		,#{tooltip},#{glampInnerFclty},#{caravInnerFclty},#{operPdCl},#{operDeCl},#{trlerAcmpnyAt},#{caravAcmpnyAt},#{toiletCo}
+		,#{swrmCo},#{wtrplCo},#{brazierCl},#{sbrsCl},#{sbrsEtc},#{posblFcltyCl},#{posblFcltyEtc},#{themaEnvrnCl},#{eqpmnLendCl}
+		,#{animalCmgCl},#{tourEraCl},#{firstImageUrl},#{createdtime})
+	</insert>
+	
+	<!-- 테마검색 - 전체 게시글 가져오기  -->
+	<select id="ts_selectAll" resultType="com.java.www.dto.TSearchDto">
+       select * from ( select row_number() over(order by contentId desc)rnum, a.*from gocamping a ) 
+       where rnum between #{startRow} and #{endRow}
+    </select>
+    <!-- 게시글 전체 가져오기 ajax 더보기 버튼  -->
+	<select id="ts_selectCountAll" resultType="int">
+       select count(*) from gocamping 
+    </select>
+  	  <!-- 테마검색 - 게시글 1개 가져오기  -->
+    <select id="ts_selectOne" resultType="com.java.www.dto.TSearchDto">
+   		select * from gocamping where contentId=#{contentId}
+    </select>
+    <select id="theme_Search" resultType="com.java.www.dto.TSearchDto">
+	    SELECT * FROM gocamping WHERE
+            <foreach collection="list" index="index" item="themaEnvrnCl" open="(" close=")" separator="or">
+                themaEnvrnCl LIKE '%'||#{themaEnvrnCl}||'%'
+            </foreach>
+	</select>
+  	  
+  
+    
+	
+	
+	
+	
+</mapper> 

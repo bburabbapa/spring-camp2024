@@ -1,0 +1,72 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--membermapper.java연결  -->
+<mapper namespace="com.java.www.mapper.FBoardMapper2">
+
+	<!-- 메인파튼 자유게시판 가져오기  -->
+	<select id="FSelectAll" resultType="com.java.www.dto.FBoardDto2"> 
+	  select * from (select row_number() over(order by f_bgroup desc, f_bstep asc) rnum, 
+	  a.* from f_board a) where rnum between 1 and 5 
+    </select>
+  
+    <!-- 게시글 전체 가져오기  -->
+    <select id="FlistSelectAll" resultType="com.java.www.dto.FBoardDto2">
+		select * from (select row_number() over(order by f_bgroup desc, f_bstep asc) rnum, a.* from f_board a
+		 <if test="searchTitle=='f_btitle' or searchTitle=='f_bcontent' or searchTitle=='id'">
+             where ${searchTitle} like '%'||#{searchWord}||'%'
+         </if>
+         <if test="searchTitle=='all'">
+           	 where f_btitle like '%'||#{searchWord}||'%' or f_bcontent like '%'||#{searchWord}||'%'
+         </if>
+		) where rnum between #{startRow} and #{endRow}
+    </select> 
+    
+    
+    
+    <!-- 게시글 총개수  -->
+   <select id="FlistSelectCountAll" resultType="int">
+     	select count(*) from f_board
+        <if test="searchTitle =='f_btitle' or searchTitle =='f_bcontent' or searchTitle=='id'">
+          where ${searchTitle} like '%'||#{searchWord}||'%'
+        </if>
+        <if test="searchTitle=='all'">
+          where f_btitle like '%'||#{searchWord}||'%' or f_bcontent like '%'||#{searchWord}||'%'
+        </if>
+   </select>
+   
+
+    
+     <!-- 게시글1개 가져오기 : 현재글 -->
+    <select id="FlistSelectOne" resultType="com.java.www.dto.FBoardDto2">
+     	select * from f_board where f_bno = #{f_bno}
+    </select> 
+    
+    <!-- 게시글1개 가져오기 : 이전글 -->
+     <select id="preSelectOne" resultType="com.java.www.dto.FBoardDto2">
+        select * from (select rownum rnum, a.* from 
+		(select * from f_board order by f_bno desc) a )
+		where rnum =(select rnum from (select rownum rnum, a.* from 
+		(select * from f_board order by f_bno desc) a)
+		where f_bno=#{f_bno})+1		
+    </select> 
+    
+    <!-- 게시글1개 가져오기 : 다음글 -->
+    <select id="nextSelectOne" resultType="com.java.www.dto.FBoardDto2">
+      select * from (select rownum rnum, a.* from 
+		(select * from f_board order by f_bno desc) a )
+		where rnum =(select rnum from (select rownum rnum, a.* from 
+		(select * from f_board order by f_bno desc) a)
+		where f_bno=#{f_bno})-1		
+    </select> 
+    
+    <!-- 조회수 1증가 -->
+<!-- 	   <update id="f_bhitUp">
+	      update f_board set f_bhit= f_bhit+1 where f_bno=#{f_bno}
+	   </update> --> 
+	    
+    
+    
+      
+</mapper>

@@ -1,0 +1,70 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--membermapper.java연결  -->
+<mapper namespace="com.java.www.mapper.TBoardMapper2">
+    <!-- 게시글 전체 가져오기 -->
+    <select id="TSelectAll" resultType="com.java.www.dto.TBoardDto2">
+     	select * from 
+		(select row_number() over(order by t_bgroup desc, t_bstep asc) rnum, a.* from t_board a)
+		where rnum between 1 and 5
+    </select> 
+    
+        <!-- 게시글 전체 가져오기  -->
+    <select id="TlistSelectAll" resultType="com.java.www.dto.TBoardDto2">
+		select * from (select row_number() over(order by t_bgroup desc, t_bstep asc) rnum, a.* from t_board a
+		 <if test="searchTitle=='t_btitle' or searchTitle=='t_bcontent' or searchTitle=='id'">
+             where ${searchTitle} like '%'||#{searchWord}||'%'
+         </if>
+         <if test="searchTitle=='all'">
+           	 where t_btitle like '%'||#{searchWord}||'%' or t_bcontent like '%'||#{searchWord}||'%'
+         </if>
+		) where rnum between #{startRow} and #{endRow}
+    </select> 
+    
+    
+    <!-- 게시글 총개수  -->
+   <select id="TlistSelectCountAll" resultType="int">
+     	select count(*) from t_board
+        <if test="searchTitle =='t_btitle' or searchTitle =='t_bcontent' or searchTitle=='id'">
+          where ${searchTitle} like '%'||#{searchWord}||'%'
+        </if>
+        <if test="searchTitle=='all'">
+          where t_btitle like '%'||#{searchWord}||'%' or t_bcontent like '%'||#{searchWord}||'%'
+        </if>
+   </select>
+   
+
+    
+     <!-- 게시글1개 가져오기 : 현재글 -->
+    <select id="TlistSelectOne" resultType="com.java.www.dto.TBoardDto2">
+     	select * from t_board where t_bno = #{t_bno}
+    </select> 
+    
+    <!-- 게시글1개 가져오기 : 이전글 -->
+     <select id="preSelectOne" resultType="com.java.www.dto.TBoardDto2">
+        select * from (select rownum rnum, a.* from 
+		(select * from t_board order by t_bno desc) a )
+		where rnum =(select rnum from (select rownum rnum, a.* from 
+		(select * from t_board order by t_bno desc) a)
+		where t_bno=#{t_bno})+1		
+    </select> 
+    
+    <!-- 게시글1개 가져오기 : 다음글 -->
+    <select id="nextSelectOne" resultType="com.java.www.dto.TBoardDto2">
+      select * from (select rownum rnum, a.* from 
+		(select * from t_board order by t_bno desc) a )
+		where rnum =(select rnum from (select rownum rnum, a.* from 
+		(select * from t_board order by t_bno desc) a)
+		where t_bno=#{t_bno})-1		
+    </select> 
+    
+    <!-- 조회수 1증가 -->
+<!--   <update id="f_bhitUp">
+	      update f_board set f_bhit= f_bhit+1 where f_bno=#{f_bno}
+	   </update> --> 
+	    
+    
+</mapper>
+
